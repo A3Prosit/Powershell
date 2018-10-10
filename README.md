@@ -45,9 +45,6 @@
 
 # Définition des contraintes
 
-# Généralisation
-
-Automatisation
 
 # Hypothèses
 
@@ -75,99 +72,100 @@ Automatisation
 	- Crontab
 
 # POWERSHELL
-- Scripts shell
-- Fichiers en texte clair interprété par un shell de commande
+
+- Successeur de Windows NT (1993) (cmd.exe)
+- Successeur de MS-DOS de Windows 98 (command.com)
+- Scripts shell (Interpréteur de commande)
+- Série commandes écrites dans un fichier
 - Chaque ligne est exécutée dans l'ordre
+- Va s'appuyer sur le framework *Microsoft .Net*
 
 
-Pour :
-- Pratique
-mais
-- Peut faire des ravages si fait à la va vite
+## Structure & commandes 
 
-**10 Conseils**
-- Préférer les variables (%) (ex : SystemRoot qui pointe vers le repertoire d'instalation)
-- Utiliser 'set' pour voir la liste de variables environnement
+- Structure des commandes :
+![](https://www.it-connect.fr/wp-content-itc/uploads/2014/12/cmdlet-550x181.png)
 
-**Paramètres de sécurité initiaux**
-- N'exécutera pas les fichiers .PS1 si on double clique dessus (bloc note par défaut)
-- Stratégie d’exécution est définit sur *"Restricted"* dès l'installation (interdit exécution, permet importer quelques XML signés par Microsoft, donc empêche nos propres scripts au démarrage)
-	- Décrit les conditions dans lesquelles un script s’exécutera
+- Variables :
+	- Emplacement de stockage provisoire
+	- Variables utilisent $
+	- Variables d'environnement : $env:[NomVariableEnvironnement]
+	- Repose sur le principe de la POO (Classe / Instance / Collection / Propriétés / Méthodes...)
+		- Utiliser un point pour accéder à l'attribut d'un objet, ou une de ses méthodes.
+	- **Conseils variables :**
+		- Préférer les variables (%) (ex : SystemRoot qui pointe vers le repertoire d'instalation)
+		- Utiliser 'set' pour voir la liste de variables environnement
+
+- Les | : Permet d'utiliser la sortie d'une commande, pour la passer en entrée d'une autre commande.
+![](https://www.it-connect.fr/wp-content-itc/uploads/2014/12/pipelinebis-550x300.png)
+
+
+## Commandes de base :
+- Get-Help : Obtenir de l'information sur une commande
+- Get-Command : Obtenir les commandes disponibles
+- Get-Member : Récupérer les propriétés et méthodes d'un objet. 
+- Get-ItemProperty : Obtenir les propriétés d'un item (dernier accès... & utiliser registre)
+- Get-ChildItem : Retourne les items et ses enfants sur un Path
+	- Retourne tous les fichier (childs) et fichiers sous-jacents depuis un Path
+- **Message Box function** : Fenêtre popup en PowerShell programmable et configurable
+- **User Account Control** : Fonctionnalité permettant de prévenir d'un changement de config sous Windows. "Voulez-vous vraiment exécuter ce programme windows" (popup')
+	- Modifiable depuis cmd : `C:\Windows\System32\UserAccountControlSettings.exe`
+	- Modifiable depuis regedit | registre :
+``HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System``
+	- Modifiable depuis un GPO de domaine (ensemble machines d'un AD) :
+- Add-Type : Ajouter une classe Microsoft.NET à la session Powershell
+	- Instancier des objets avec 'New-Object' et les utiliser
+	- Si on l'ajoute au profil Windows PowerShell, la classe sera disponible sur toutes les sessions
+	- On peut indiquer un type, spécifier des méthodes...
+
+## Exécuter un script powershell :
+- Exécutable depuis un .bat
+- Exécutable depuis un .ps1
+- Exécutable depuis un terminal
+- Exécutable depuis l’interpréteur PowerShell
+Principe du dot-sourcings :
+- .  .\exemple.ps1⇒ Exécuter un script et afficher le résultat console
+	- Permet de réutiliser les variables qui auraient été détruites
+
+## Les stratégies d'exécutions :
+
+- **Restricted** :
+	- Stratégie par défaut lors de l'installation Windows
+	- N'exécutera pas les fichiers .PS1 si on double clique dessus (bloc note par défaut)
+	- interdit exécution, permet importer quelques XML signés par Microsoft, donc empêche nos propres scripts au démarrage
+- **Unrestricted**
+	-  Stratégie sans restrictions, fortement déconseillé
+- **Allsigned**
+	- Stratégie la plus sécurisée
+	- Exécute que signature avec certificats approuvés par microsoft
+	- Obtenu près de l'Infra de la clé publique (PKI) de l'entreprise
+	- A acheter auprès des autorisations de certification commerciale (CA) {CyberTrust / Thawte ...}
+- **RemoteSigned**
+	- Fichiers Locaux sans signature s'exécutent
+	- Les scripts télécharges depuis navigateur / outlook... : Non
+	- MAIS :
+		- On peut quand même lancer un script manuellement téléchargé (Domaine de l'info)
+		- /!\ Comporte des failles, dont une porte dérobée avec script basé sur les profils
+
+**Pour les modifier :**  
 	- Modifiable avec 'Set-ExecutionPolicy' ou fichier AMD (fichier microsoft)
 	- Get-AuthenticodeSignature pour examiner des scripts
 ````
 PS C:\Program Files\Microsoft Office\Office12>
 Get-AuthenticodeSignature excel.exe | Format-List *
 ````
+## Pour & Contre : 
 
-- Stratégie la plus basse "Unrestricted" (sans restrictions, fortement déconseillé)
-- Stratégie la plus sécurisée "Allsigned" (exécute que avec signature avec certificat approuvé par microsoft)
-	- Classe III, obtenu près de l'infrastructure de clé publique (PKI) de mon entreprise à acheter auprès des autorisations de certification commerciale (CA) comme CyberTrust / Thawte ou VeriSign
-- Stratégie "RemoteSigned" (Fichiers locaux sans signature s'éxecutent, télechargés non [outlook..])
-	- On peut quand même lancer un script manuellement téléchargé (que les infos' le savent)
-	- /!\Existe une porte dérobée avec un script basé sur les profils
+- Pratique
+- Permet de gérer des chaînes de caractères avec des unités de 16 bits
+mais
+- Peut faire des ravages si fait à la va vite
 
-## UAC : 
-
-- User Account Control : Fonctionnalité permettant de prévenir d'un changement de config sous Windows. "Voulez-vous vraiment exécuter ce programme windows" (popup')
-- Modifiable depuis cmd : `C:\Windows\System32\UserAccountControlSettings.exe`
-- Modifiable depuis regedit | registre :
-``HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System``
-- Modifiable depuis un GPO de domaine (ensemble machines d'un AD) :
-	- depuis racine de domaine, GPO ⇒ Désactivation UAC
-
-## Message Box Function :
-- Fenêtre popup en PowerShell codable
-
-## Get-ItemProperty Cmdlet
-- Get-ChildItem c:\scripts ⇒ Retourne tous les fichiers dans le dossier scripts.
-- Permet aussi d'énumérer toutes les clés de registres d'une application :
-```
-Get-ItemProperty "hklm:\software\microsoft\windows\currentversion\uninstall\windows media player"
-```
-```
-DisplayName       : Windows Media Player 10
-UninstallString   : "C:\Program Files\Windows Media Player\Setup_wm.exe" /Uninstall
-DisplayIcon       : C:\Program Files\Windows Media Player\wmplayer.exe
-ParentKeyName     : OperatingSystem
-ParentDisplayName : Windows Updates
-```
-
-## Add-Type :
-
-- Permet de définir des classes .NET Framework dans une session Windows Powershell
-	- Instancier des objets avec 'New-Object' et les utiliser
-	- Si on l'ajoute au profil Windows PowerShell, la classe sera disponible sur toutes les sessions
-	- On peut indiquer un type, spécifier des méthodes...
-	- Le type est définit par un "assembly" ou un code source (donc on le crée)
-Paramètres :
-````
-- AssembyName (string) : Nom de l'assembly - Obligatoire
-- CodeDomProvider : Compilateur - Optionnel
-- CompilerParameters : Options du compilateur - Optionnel
-- IgnoreWarnings : Ignorer les avertissements du compilateur (not an error) - Optionnel
-- Language : C# par défaut, pour sélectionner le compilateur de code - Optionnel
-- MemberDefinition (String) : Nouvelles propriétés ou méthodes pour la classe - Obligatoire
-- Name (String) : Nom de la classe à créer - Obligatoire
-- Namespace (String) : Espace de nom pour le type. (sinon dans espace de noms de M.PowerShell) - Opt
-- OutputAssembly (String) : Génère un DLL avec le nom spécifié dans l'emplacement - Opt
-- OutputType : Le type de sortie de l'assembly - Opt
-- PassThru : Retourne un objet, qui représente les types ajoutés (informatif) - Opt
-- Path (String) : Chemin vers code source ou DLL contenant les types - Obligatoire
-- ReferencedAssemblies (String) : Par défaut, Assemblys référence à System.dll, on peut le changer - Opt
-- TypeDefinition (String) : Code source qui contient les déf. de types - Obligatoire
- - UsingNamespace (String) : Spécifie les espaces de noms pour la classe (System par défaut) - Opt
- - CommonParameters : Prend en charge les paramètres courants comme ErrorAction... 
-````
-⇒ On ne peut pas mettre d'entrée objet vers Add-Type
-⇒ On ne peut pas mettre de sorties, sauf System.RuntimeType
-
-
-## Exécuter un script powershell :
-- Exécutable depuis un .bat
-- Exécutable depuis un terminal
-- Exécutable depuis l’interpréteur PowerShell
-- Exécutable depuis un .ps1
+## Équivalences Linux & Mac : 
+- Linux :
+![](https://user.oc-static.com/files/160001_161000/160272.png)
+	- SH = ancêtre de tous les shell
+	- Bash : Shell par défaut mais aussi sous MacOS X.
 
 ## Corbeille exercice : 
 - *Get-Help* [nom-commande]
@@ -193,4 +191,60 @@ Paramètres :
 - *Get-Command | foreach {write-host "$_ est une commande de PowerShell"} :* Récupère la liste des commandes, et pour chaque write-host, en rajoutant la chaine juste après, l'affichant sur un terminal
 - *Get-Command | Foreach {Get-Help $_ -detailed |Out-File -FilePath C:\temp\$_.txt –Encoding ASCII}* : Récupère la liste des commandes, pour chaque commande, on va obtenir l'aide détaillée, et on va créer un fichier du nom de la commande en .txt qui va contenir l'aide, avec un encodage ASCII)
 - *Get-ChildItem C:\temp | ForEach-Object {$_.Get_extension().toLower()} |Sort-Object | Get-Unique| Out-File –FilePath C:\temp\extensions.txt -Encoding ASCII :* On récupère la liste des répertoires, pour chaque objet du répertoire, l'extension (en minuscule), et trié, et pas en double, on va créer un fichier extension.txt qui contient les extensions).
-- 
+
+## Workshop : 
+````POWERSHELL
+$rep = New-Object -TypeName System.String -ArgumentList "***************** FICHIER DE LOG *****************"
+
+
+$dateDuJour = Get-Date -UFormat "%Y-%m-%d"
+$log = "C:\temp\"+$dateDuJour+"-result.log"
+
+
+if(Test-Path $log){
+    Write-Host("Création d'une copie .bak")
+    Copy-Item $log $log'.bak'
+} else {
+    $rep | Out-File -FilePath $log
+}
+
+$table = Get-ChildItem -Path (Get-Item env:\PUBLIC).value -Recurse -File
+
+$taille_max = 512 #512Ko
+$cpt = 0 
+foreach ($data  in $table){
+    if($data.Length/1000 -ge $taille_max){
+        $var = $data.FullName+"   trouvé : "+$data.Length/1000+" Ko"
+        Add-Content -Path $log -Value $var
+        $cpt++
+    }
+}
+$cptAff = "Total de fichier trouvés > "+$taille_max+" Ko : "+$cpt
+Add-Content -Path $log -Value $cptAff
+
+
+#New-EventLog -LogName Application -Source Test ##Création du Log - A n'exécuter qu'une seule fois
+
+#Get-EventLog -List #==> Consulter la liste des EventLog
+Write-EventLog -LogName Application -Source "Test" -Message $cptAff -EventId 1000 -EntryType information
+#Get-EventLog -list | ? log -eq Application #Voir le nombre d'entrées dans "Application"
+#Get-EventLog -LogName Application -Source "Test" #voir tous les enregistrements
+#eventvwr #afficher journal windows
+
+#Write-Host((Get-winevent -listlog Application).providernames) #Renvoi la liste des sources (ceux qui écrivent)
+if ((Get-winevent -listlog Application).providernames -contains "Test") { write-Host("Journal bien exécuté") }
+
+#New-Item -Path HKLM:\HKEY_LOCAL_MACHINE\SOFTWARE\ -Name Test #Créer la clé de registre
+$item = Get-ItemProperty -Path HKLM:\HKEY_LOCAL_MACHINE\SOFTWARE\Test -Name "Date"
+if (((get-date $dateDuJour) - (get-date $item.Date)) -gt 5){
+    $message = "Vous n'avez pas lancé le script depuis le "+$item.Date+" Faites attention !!!"
+    Write-EventLog -LogName Application -Source "Test" -Message $message -EventId 1000 -EntryType warning
+}
+
+#Set-ItemProperty -Path HKLM:\HKEY_LOCAL_MACHINE\SOFTWARE\Test -Value $dateDuJour -Name "Date"
+Set-ItemProperty -Path HKLM:\HKEY_LOCAL_MACHINE\SOFTWARE\Test -Value $cpt -Name "Compteur fichiers > 512 Mo"
+
+Get-EventLog -LogName Application -Source "Test" #voir tous les enregistrements
+````
+
+
