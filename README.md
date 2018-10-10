@@ -5,17 +5,17 @@
 
 # Définition des termes
 
--UAC
+-UAC : User Account Control
 
 -// Contrôleur de domaine
 
--Script
+-Script : Programme en langage interprété, qui permet de manipuler les fonctionnalités d'un système informatique.
 
 -// Windows
 
--Commutateur
+-Commutateur : Switch
 
--Batch
+-Batch : Traitement Batch ⇒ Enchaînement automatique d'une suite de commande (processus) sur un ordi sans intervention d'un opérateur. Un .BAT est l'extension d'un fichier de commande MS-DOS, permettant d'exécuter du .EXE ou du .COM.
 
 -Outil de scripting windows
 
@@ -164,7 +164,7 @@ mais
 ## Équivalences Linux & Mac : 
 - Linux :
 ![](https://user.oc-static.com/files/160001_161000/160272.png)
-	- SH = ancêtre de tous les shell
+	- SH = ancêtre de tous les shell (.sh)
 	- Bash : Shell par défaut mais aussi sous MacOS X.
 
 ## Corbeille exercice : 
